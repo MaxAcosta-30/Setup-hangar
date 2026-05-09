@@ -13,12 +13,12 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 
-	"github.com/MaxAcosta-30/hangar/api/internal/db"
-	"github.com/MaxAcosta-30/hangar/api/internal/handler"
-	"github.com/MaxAcosta-30/hangar/api/internal/middleware"
-	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
-	temporalclient "github.com/MaxAcosta-30/hangar/api/internal/temporal"
-	dockerfactory "github.com/MaxAcosta-30/hangar/api/internal/docker"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/db"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/handler"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/middleware"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/rdb"
+	temporalclient "github.com/MaxAcosta-30/Setup-hangar/api/internal/temporal"
+	dockerfactory "github.com/MaxAcosta-30/Setup-hangar/api/internal/docker"
 )
 
 func main() {

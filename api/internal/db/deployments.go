@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/MaxAcosta-30/hangar/api/internal/models"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/models"
 )
 
 // DeploymentRepository maneja queries de deployments

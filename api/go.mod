@@ -1,4 +1,4 @@
-module github.com/MaxAcosta-30/hangar/api
+module github.com/MaxAcosta-30/Setup-hangar/api
 
 go 1.25.0
 

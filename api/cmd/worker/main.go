@@ -11,12 +11,12 @@ import (
 	"github.com/joho/godotenv"
 	"go.temporal.io/sdk/worker"
 
-	"github.com/MaxAcosta-30/hangar/api/internal/activities"
-	"github.com/MaxAcosta-30/hangar/api/internal/db"
-	dockerfactory "github.com/MaxAcosta-30/hangar/api/internal/docker"
-	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
-	temporalclient "github.com/MaxAcosta-30/hangar/api/internal/temporal"
-	"github.com/MaxAcosta-30/hangar/api/internal/workflows"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/activities"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/db"
+	dockerfactory "github.com/MaxAcosta-30/Setup-hangar/api/internal/docker"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/rdb"
+	temporalclient "github.com/MaxAcosta-30/Setup-hangar/api/internal/temporal"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/workflows"
 	)
 
 func main() {

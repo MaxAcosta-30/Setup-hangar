@@ -21,8 +21,8 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.temporal.io/sdk/activity"
 
-	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
-	"github.com/MaxAcosta-30/hangar/api/internal/workflows"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/rdb"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/workflows"
 )
 
 const buildsDir = "/tmp/hangar-builds"

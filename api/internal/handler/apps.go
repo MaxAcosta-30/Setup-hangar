@@ -10,12 +10,12 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 
-	"github.com/MaxAcosta-30/hangar/api/internal/activities"
-	"github.com/MaxAcosta-30/hangar/api/internal/db"
-	dockerfactory "github.com/MaxAcosta-30/hangar/api/internal/docker"
-	"github.com/MaxAcosta-30/hangar/api/internal/models"
-	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
-	"github.com/MaxAcosta-30/hangar/api/internal/workflows"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/activities"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/db"
+	dockerfactory "github.com/MaxAcosta-30/Setup-hangar/api/internal/docker"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/models"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/rdb"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/workflows"
 
 	dockerclient "github.com/docker/docker/client"
 	"github.com/redis/go-redis/v9"

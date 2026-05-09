@@ -10,8 +10,8 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 
-	"github.com/MaxAcosta-30/hangar/api/internal/db"
-	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/db"
+	"github.com/MaxAcosta-30/Setup-hangar/api/internal/rdb"
 )
 
 // WSHandler maneja el streaming de logs via WebSocket.
