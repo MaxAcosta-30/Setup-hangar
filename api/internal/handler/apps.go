@@ -1,5 +1,5 @@
 // api/internal/handler/apps.go
-// — agrega DELETE /apps/:id al final, todo lo demás igual —
+// - agrega DELETE /apps/:id al final, todo lo demás igual -
 package handler
 
 import (
@@ -116,7 +116,7 @@ func (h *AppHandler) DeleteApp(c *fiber.Ctx) error {
 		return c.Status(404).JSON(fiber.Map{"error": "app no encontrada"})
 	}
 
-	// Usa CleanupApp directamente (sin workflow — es una operación sincrónica simple)
+	// Usa CleanupApp directamente (sin workflow - es una operación sincrónica simple)
 	rdbClient, _ := rdb.New()
 	defer rdbClient.Close()
 
@@ -128,7 +128,7 @@ func (h *AppHandler) DeleteApp(c *fiber.Ctx) error {
 
 	if err := act.CleanupApp(c.Context(), app.ID); err != nil {
 		h.log.Error("error en cleanup", zap.String("app_id", app.ID), zap.Error(err))
-		// No es fatal — el registro se borra aunque falle el cleanup de Docker
+		// No es fatal - el registro se borra aunque falle el cleanup de Docker
 	}
 
 	// Borra de DB (cascade elimina deployments y logs)
@@ -191,7 +191,7 @@ func (h *AppHandler) TriggerDeploy(c *fiber.Ctx) error {
 		"deployment":  deployment,
 		"workflow_id": we.GetID(),
 		"run_id":      we.GetRunID(),
-		"message":     "Deploy iniciado — sigue el progreso en http://localhost:8088",
+		"message":     "Deploy iniciado - sigue el progreso en http://localhost:8088",
 	})
 }
 

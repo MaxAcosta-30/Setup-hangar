@@ -1,4 +1,4 @@
-# ADR 003 — Estrategia de aislamiento entre tenants
+# ADR 003 - Estrategia de aislamiento entre tenants
 
 **Fecha:** 2026-05-09
 **Estado:** Aceptado
@@ -37,15 +37,15 @@ El contenedor se conecta a esa red Y a la red de Traefik (`infra_default`).
 
 ```
 App A container
-  ├── hangar-app-{idA}    ← red privada de A (solo A)
-  └── infra_default       ← red de Traefik (compartida con proxy)
+  |-- hangar-app-{idA}    <- red privada de A (solo A)
+  \-- infra_default       <- red de Traefik (compartida con proxy)
 
 App B container
-  ├── hangar-app-{idB}    ← red privada de B (solo B)
-  └── infra_default       ← red de Traefik (compartida con proxy)
+  |-- hangar-app-{idB}    <- red privada de B (solo B)
+  \-- infra_default       <- red de Traefik (compartida con proxy)
 
 Traefik
-  └── infra_default       ← puede alcanzar A y B
+  \-- infra_default       <- puede alcanzar A y B
 ```
 
 **Resultado:**
@@ -77,7 +77,7 @@ docker.ContainerCreate(ctx, config, hostConfig,
 )
 
 // 3. Post-start: conectar a red de Traefik
-// (ContainerCreate solo acepta una red — NetworkConnect es la forma correcta)
+// (ContainerCreate solo acepta una red - NetworkConnect es la forma correcta)
 docker.NetworkConnect(ctx, "infra_default", containerID, nil)
 ```
 
@@ -92,7 +92,7 @@ docker.NetworkConnect(ctx, "infra_default", containerID, nil)
 
 - Cada app ocupa una red Docker adicional (overhead mínimo: ~1KB de metadata)
 - `CleanupApp` debe eliminar la red al borrar la app para evitar acumulación
-- El nombre de red debe ser determinista: `hangar-app-{appID}` —
+- El nombre de red debe ser determinista: `hangar-app-{appID}` -
   centralizado en `appNetworkName()` para evitar inconsistencias
 
 ## Verificación
@@ -104,9 +104,10 @@ docker network ls | grep hangar-app
 # Confirmar que App A no puede alcanzar App B directamente
 docker exec hangar-{appA-id} wget -T2 http://$(docker inspect hangar-{appB-id} \
   --format '{{.NetworkSettings.Networks.hangar-app-{appB-id}.IPAddress}}'):3000
-# → debe fallar con timeout (no hay ruta entre redes)
+# -> debe fallar con timeout (no hay ruta entre redes)
 
 # Confirmar que App A sí puede salir a internet
 docker exec hangar-{appA-id} wget -T5 -q -O- https://ifconfig.me
-# → debe devolver la IP pública del host
+# -> debe devolver la IP pública del host
 ```
+

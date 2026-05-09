@@ -37,7 +37,7 @@ func NewDeployActivities(db *pgxpool.Pool, docker *dockerclient.Client, redis *r
 	return &DeployActivities{db: db, docker: docker, redis: redis}
 }
 
-// ── Activity 1 ────────────────────────────────────────────────────────────
+// -- Activity 1 ------------------------------------------------------------
 
 func (a *DeployActivities) UpdateDeployStatus(ctx context.Context, deploymentID, status string) error {
 	activity.GetLogger(ctx).Info("actualizando status",
@@ -54,7 +54,7 @@ func (a *DeployActivities) UpdateDeployStatus(ctx context.Context, deploymentID,
 	return nil
 }
 
-// ── Activity 2 ────────────────────────────────────────────────────────────
+// -- Activity 2 ------------------------------------------------------------
 
 func (a *DeployActivities) CloneRepository(ctx context.Context, input workflows.DeployInput) error {
 	workDir := filepath.Join(buildsDir, input.AppID)
@@ -80,11 +80,11 @@ func (a *DeployActivities) CloneRepository(ctx context.Context, input workflows.
 		return fmt.Errorf("Dockerfile no encontrado en %s", input.GitURL)
 	}
 
-	a.log(ctx, input.DeploymentID, "[hangar] repositorio clonado ✓")
+	a.log(ctx, input.DeploymentID, "[hangar] repositorio clonado [DONE]")
 	return nil
 }
 
-// ── Activity 3 ────────────────────────────────────────────────────────────
+// -- Activity 3 ------------------------------------------------------------
 
 func (a *DeployActivities) BuildDockerImage(ctx context.Context, input workflows.DeployInput) error {
 	workDir   := filepath.Join(buildsDir, input.AppID)
@@ -112,19 +112,19 @@ func (a *DeployActivities) BuildDockerImage(ctx context.Context, input workflows
 		return err
 	}
 
-	a.log(ctx, input.DeploymentID, fmt.Sprintf("[hangar] imagen construida: %s ✓", imageName))
+	a.log(ctx, input.DeploymentID, fmt.Sprintf("[hangar] imagen construida: %s [DONE]", imageName))
 	return nil
 }
 
-// ── Activity 4 ────────────────────────────────────────────────────────────
+// -- Activity 4 ------------------------------------------------------------
 
 // RunContainer crea una red aislada por app, arranca el contenedor en esa red,
 // y luego lo conecta a la red de Traefik para que el routing funcione.
 //
 // Por qué dos redes y no una:
-//   - Red app (hangar-app-{id}): aislada por app — App A no puede hacer
+//   - Red app (hangar-app-{id}): aislada por app -- App A no puede hacer
 //     requests directos a App B aunque conozca su IP interna.
-//   - Red Traefik (infra_default): compartida solo con el proxy —
+//   - Red Traefik (infra_default): compartida solo con el proxy --
 //     Traefik puede alcanzar el contenedor para hacer el routing.
 //
 // El resultado: el único camino entre apps es a través de sus subdominios
@@ -142,14 +142,14 @@ func (a *DeployActivities) RunContainer(ctx context.Context, input workflows.Dep
 	// Limpia contenedor anterior si existe (re-deploy)
 	a.stopAndRemoveContainer(ctx, containerName)
 
-	// ── Crea la red aislada de la app ─────────────────────────────────
+	// -- Crea la red aislada de la app ---------------------------------
 	// Si ya existe (deploy anterior fallido a medias), la reutilizamos
 	a.log(ctx, input.DeploymentID,
 		fmt.Sprintf("[hangar] creando red aislada: %s...", appNetwork),
 	)
 	_, err := a.docker.NetworkCreate(ctx, appNetwork, networktypes.CreateOptions{
 		Driver:     "bridge",
-		// Internal: false — la app SÍ puede salir a internet.
+		// Internal: false -- la app SÍ puede salir a internet.
 		// El aislamiento es lateral (entre apps), no vertical (hacia internet).
 		Internal:   false,
 		Labels: map[string]string{
@@ -157,12 +157,12 @@ func (a *DeployActivities) RunContainer(ctx context.Context, input workflows.Dep
 			"hangar.app_id":     input.AppID,
 		},
 	})
-	// Si la red ya existe, NetworkCreate devuelve error — lo ignoramos
+	// Si la red ya existe, NetworkCreate devuelve error -- lo ignoramos
 	if err != nil && !strings.Contains(err.Error(), "already exists") {
 		return fmt.Errorf("error creando red de app: %w", err)
 	}
 
-	// ── Labels para que Traefik detecte automáticamente el routing ─────
+	// -- Labels para que Traefik detecte automáticamente el routing -----
 	routerName := fmt.Sprintf("hangar-%s", input.AppID)
 	labels := map[string]string{
 		"traefik.enable": "true",
@@ -173,7 +173,7 @@ func (a *DeployActivities) RunContainer(ctx context.Context, input workflows.Dep
 		"hangar.managed_by": "hangar",
 	}
 
-	// ── Crea el contenedor conectado SOLO a la red de app ─────────────
+	// -- Crea el contenedor conectado SOLO a la red de app -------------
 	// Traefik se conectará en el siguiente paso via NetworkConnect
 	a.log(ctx, input.DeploymentID, "[hangar] iniciando contenedor...")
 	createResp, err := a.docker.ContainerCreate(
@@ -202,16 +202,16 @@ func (a *DeployActivities) RunContainer(ctx context.Context, input workflows.Dep
 		return fmt.Errorf("error creando contenedor: %w", err)
 	}
 
-	// ── Arranca el contenedor ──────────────────────────────────────────
+	// -- Arranca el contenedor ------------------------------------------
 	if err := a.docker.ContainerStart(ctx, createResp.ID, containertypes.StartOptions{}); err != nil {
 		return fmt.Errorf("error arrancando contenedor: %w", err)
 	}
 
-	// ── Conecta el contenedor a la red de Traefik ─────────────────────
+	// -- Conecta el contenedor a la red de Traefik ---------------------
 	// Se hace POST-start porque ContainerCreate solo acepta una red.
 	// Traefik detecta el nuevo contenedor en su red y crea el routing automáticamente.
 	if err := a.docker.NetworkConnect(ctx, traefikNetwork, createResp.ID, nil); err != nil {
-		// No es fatal — el contenedor corre, solo falla el routing público
+		// No es fatal -- el contenedor corre, solo falla el routing público
 		a.log(ctx, input.DeploymentID,
 			fmt.Sprintf("[hangar] advertencia: no se pudo conectar a red Traefik: %v", err),
 		)
@@ -219,12 +219,12 @@ func (a *DeployActivities) RunContainer(ctx context.Context, input workflows.Dep
 
 	url := fmt.Sprintf("http://%s.hangar.local", input.Subdomain)
 	a.log(ctx, input.DeploymentID,
-		fmt.Sprintf("[hangar] app disponible en %s ✓", url),
+		fmt.Sprintf("[hangar] app disponible en %s [DONE]", url),
 	)
 	return nil
 }
 
-// ── Activity 5 (nueva): CleanupApp ───────────────────────────────────────
+// -- Activity 5 (nueva): CleanupApp ---------------------------------------
 
 // CleanupApp detiene y elimina el contenedor y la red aislada de una app.
 // Se llama cuando el usuario elimina una app desde el dashboard.
@@ -244,7 +244,7 @@ func (a *DeployActivities) CleanupApp(ctx context.Context, appID string) error {
 	return nil
 }
 
-// ── Helpers privados ──────────────────────────────────────────────────────
+// -- Helpers privados ------------------------------------------------------
 
 func (a *DeployActivities) log(ctx context.Context, deploymentID, message string) {
 	_, _ = a.db.Exec(ctx,

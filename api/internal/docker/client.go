@@ -8,7 +8,7 @@ import (
 )
 
 // New crea un cliente de Docker Engine conectado al socket local.
-// Por defecto usa /var/run/docker.sock — el mismo que usa Traefik.
+// Por defecto usa /var/run/docker.sock - el mismo que usa Traefik.
 func New() (*client.Client, error) {
 	cli, err := client.NewClientWithOpts(
 		client.FromEnv,

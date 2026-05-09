@@ -34,9 +34,9 @@ const baseURL = "http://localhost:3000"
 // Cambia esto a tu repo local si es diferente
 const testGitURL = "file:///home/max/hello-hangar-repo"
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Helpers
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 func post(t *testing.T, path string, body any) map[string]any {
 	t.Helper()
@@ -99,7 +99,7 @@ func waitForStatus(t *testing.T, deploymentID string, timeout time.Duration) str
 			return status
 		}
 
-		t.Logf("deployment %s status: %s — esperando...", deploymentID[:8], status)
+		t.Logf("deployment %s status: %s -- esperando...", deploymentID[:8], status)
 		time.Sleep(3 * time.Second)
 	}
 
@@ -107,15 +107,15 @@ func waitForStatus(t *testing.T, deploymentID string, timeout time.Duration) str
 	return ""
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Tests
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 // TestHealthCheck verifica que el API responde correctamente
 func TestHealthCheck(t *testing.T) {
 	resp, err := http.Get(baseURL + "/health")
 	if err != nil {
-		t.Fatalf("API no responde: %v — ¿está corriendo go run cmd/server/main.go?", err)
+		t.Fatalf("API no responde: %v -- ¿está corriendo go run cmd/server/main.go?", err)
 	}
 	defer resp.Body.Close()
 
@@ -133,7 +133,7 @@ func TestHealthCheck(t *testing.T) {
 		t.Errorf("postgres no está ok: %v", body["postgres"])
 	}
 
-	t.Log("✓ health check ok")
+	t.Log("[DONE] health check ok")
 }
 
 // TestCreateApp verifica la creación de una app y la generación del subdominio
@@ -160,7 +160,7 @@ func TestCreateApp(t *testing.T) {
 		t.Errorf("status inicial esperado 'idle', recibido: %v", app["status"])
 	}
 
-	t.Logf("✓ app creada: id=%s subdomain=%s", app["id"], app["subdomain"])
+	t.Logf("[DONE] app creada: id=%s subdomain=%s", app["id"], app["subdomain"])
 }
 
 // TestFullDeployFlow es el test más importante:
@@ -169,7 +169,7 @@ func TestCreateApp(t *testing.T) {
 func TestFullDeployFlow(t *testing.T) {
 	appName := fmt.Sprintf("integration-test-%d", time.Now().Unix())
 
-	// ── 1. Crea la app ────────────────────────────────────────────────
+	// -- 1. Crea la app ------------------------------------------------
 	createResult := post(t, "/api/v1/apps", map[string]string{
 		"name":    appName,
 		"git_url": testGitURL,
@@ -183,7 +183,7 @@ func TestFullDeployFlow(t *testing.T) {
 	subdomain := app["subdomain"].(string)
 	t.Logf("app creada: %s (%s)", appName, appID[:8])
 
-	// ── 2. Dispara el deploy ──────────────────────────────────────────
+	// -- 2. Dispara el deploy ------------------------------------------
 	deployResult := post(t, fmt.Sprintf("/api/v1/apps/%s/deploy", appID), nil)
 
 	deployment, ok := deployResult["deployment"].(map[string]any)
@@ -193,7 +193,7 @@ func TestFullDeployFlow(t *testing.T) {
 	deploymentID := deployment["id"].(string)
 	t.Logf("deploy iniciado: %s", deploymentID[:8])
 
-	// ── 3. Espera que el workflow complete (máx 90 segundos) ──────────
+	// -- 3. Espera que el workflow complete (máx 90 segundos) ----------
 	finalStatus := waitForStatus(t, deploymentID, 90*time.Second)
 
 	if finalStatus != "success" {
@@ -202,14 +202,14 @@ func TestFullDeployFlow(t *testing.T) {
 		t.Logf("logs del deploy fallido: %v", logsResult)
 		t.Fatalf("deploy terminó con status '%s', esperaba 'success'", finalStatus)
 	}
-	t.Logf("✓ deploy completado con status: %s", finalStatus)
+	t.Logf("[DONE] deploy completado con status: %s", finalStatus)
 
-	// ── 4. Verifica los logs en DB ────────────────────────────────────
+	// -- 4. Verifica los logs en DB ------------------------------------
 	logsResult := get(t, fmt.Sprintf("/api/v1/deployments/%s/logs", deploymentID))
 	logs, _ := logsResult["logs"].([]any)
 
 	if len(logs) == 0 {
-		t.Error("deploy_logs está vacío — las actividades no guardaron logs")
+		t.Error("deploy_logs está vacío -- las actividades no guardaron logs")
 	}
 
 	// Verifica que hay al menos los logs clave del flujo completo
@@ -242,9 +242,9 @@ func TestFullDeployFlow(t *testing.T) {
 			t.Errorf("log esperado no encontrado: '%s'", expected)
 		}
 	}
-	t.Logf("✓ %d líneas de log verificadas", len(logs))
+	t.Logf("[DONE] %d líneas de log verificadas", len(logs))
 
-	// ── 5. Verifica la red aislada en Docker ─────────────────────────
+	// -- 5. Verifica la red aislada en Docker -------------------------
 	// La red debe existir con el nombre correcto
 	expectedNetwork := fmt.Sprintf("hangar-app-%s", appID)
 	t.Logf("verificando red aislada: %s", expectedNetwork)
@@ -252,15 +252,15 @@ func TestFullDeployFlow(t *testing.T) {
 	// Usamos la API de Docker directamente via HTTP para no importar el SDK aquí
 	dockerResp, err := http.Get("http://localhost:2375/networks/" + expectedNetwork)
 	if err == nil && dockerResp.StatusCode == 200 {
-		t.Logf("✓ red aislada existe: %s", expectedNetwork)
+		t.Logf("[DONE] red aislada existe: %s", expectedNetwork)
 		dockerResp.Body.Close()
 	} else {
-		// Docker por defecto escucha en socket, no en TCP — skip este check si no hay TCP
-		t.Logf("⚠ verificación de red skipped (Docker API TCP no disponible en :2375)")
+		// Docker por defecto escucha en socket, no en TCP -- skip este check si no hay TCP
+		t.Logf("[WARNING] verificación de red skipped (Docker API TCP no disponible en :2375)")
 		t.Logf("  verifica manualmente: docker network ls | grep %s", appID[:8])
 	}
 
-	t.Logf("✓ flujo completo verificado para app: %s.hangar.local", subdomain)
+	t.Logf("[DONE] flujo completo verificado para app: %s.hangar.local", subdomain)
 }
 
 // TestSubdomainUniqueness verifica que dos apps con el mismo nombre
@@ -285,7 +285,7 @@ func TestSubdomainUniqueness(t *testing.T) {
 		t.Errorf("colisión de subdominios: ambas apps tienen '%s'", firstSubdomain)
 	}
 
-	t.Logf("✓ subdominios únicos: '%s' y '%s'", firstSubdomain, secondSubdomain)
+	t.Logf("[DONE] subdominios únicos: '%s' y '%s'", firstSubdomain, secondSubdomain)
 }
 
 // TestDeployNonexistentApp verifica que disparar deploy en app inexistente
@@ -306,12 +306,12 @@ func TestDeployNonexistentApp(t *testing.T) {
 		t.Errorf("esperaba 404, recibió %d", resp.StatusCode)
 	}
 
-	t.Log("✓ app inexistente devuelve 404 correctamente")
+	t.Log("[DONE] app inexistente devuelve 404 correctamente")
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 // Helpers internos
-// ─────────────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
 
 func containsStr(s, substr string) bool {
 	return len(s) >= len(substr) && (s == substr ||
