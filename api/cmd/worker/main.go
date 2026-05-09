@@ -11,13 +11,13 @@ import (
 	"github.com/joho/godotenv"
 	"go.temporal.io/sdk/worker"
 
-	"github.com/tu-usuario/hangar/api/internal/activities"
-	"github.com/tu-usuario/hangar/api/internal/db"
-	dockerfactory "github.com/tu-usuario/hangar/api/internal/docker"
-	"github.com/tu-usuario/hangar/api/internal/rdb"
-	temporalclient "github.com/tu-usuario/hangar/api/internal/temporal"
-	"github.com/tu-usuario/hangar/api/internal/workflows"
-)
+	"github.com/MaxAcosta-30/hangar/api/internal/activities"
+	"github.com/MaxAcosta-30/hangar/api/internal/db"
+	dockerfactory "github.com/MaxAcosta-30/hangar/api/internal/docker"
+	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
+	temporalclient "github.com/MaxAcosta-30/hangar/api/internal/temporal"
+	"github.com/MaxAcosta-30/hangar/api/internal/workflows"
+	)
 
 func main() {
 	if err := godotenv.Load(); err != nil {

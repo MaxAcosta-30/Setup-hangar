@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/tu-usuario/hangar/api/internal/models"
+	"github.com/MaxAcosta-30/hangar/api/internal/models"
 )
 
 // AppRepository maneja todas las queries relacionadas a apps
@@ -129,4 +129,15 @@ func (r *AppRepository) SubdomainExists(ctx context.Context, subdomain string) (
 	}
 
 	return exists, nil
+}
+
+// Pool expone el pool para uso en handlers que necesitan dependencias directas
+func (r *AppRepository) Pool() *pgxpool.Pool {
+    return r.pool
+}
+
+// Delete elimina una app y en cascada sus deployments y logs
+func (r *AppRepository) Delete(ctx context.Context, id string) error {
+    _, err := r.pool.Exec(ctx, `DELETE FROM apps WHERE id = $1`, id)
+    return err
 }

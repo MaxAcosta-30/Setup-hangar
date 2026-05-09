@@ -1,4 +1,4 @@
-module github.com/tu-usuario/hangar/api
+module github.com/MaxAcosta-30/hangar/api
 
 go 1.25.0
 

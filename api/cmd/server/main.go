@@ -13,11 +13,12 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 
-	"github.com/tu-usuario/hangar/api/internal/db"
-	"github.com/tu-usuario/hangar/api/internal/handler"
-	"github.com/tu-usuario/hangar/api/internal/middleware"
-	"github.com/tu-usuario/hangar/api/internal/rdb"
-	temporalclient "github.com/tu-usuario/hangar/api/internal/temporal"
+	"github.com/MaxAcosta-30/hangar/api/internal/db"
+	"github.com/MaxAcosta-30/hangar/api/internal/handler"
+	"github.com/MaxAcosta-30/hangar/api/internal/middleware"
+	"github.com/MaxAcosta-30/hangar/api/internal/rdb"
+	temporalclient "github.com/MaxAcosta-30/hangar/api/internal/temporal"
+	dockerfactory "github.com/MaxAcosta-30/hangar/api/internal/docker"
 )
 
 func main() {
@@ -50,13 +51,20 @@ func main() {
 	defer tc.Close()
 	log.Info("temporal conectado")
 
+	dockerClient, err := dockerfactory.New()
+	if err != nil {
+		log.Fatal("docker", zap.Error(err))
+	}
+	defer dockerClient.Close()
+	log.Info("docker engine conectado")
+
 	// -- Repositorios --------------------------------------------------─
 	appRepo    := db.NewAppRepository(pool)
 	deployRepo := db.NewDeploymentRepository(pool)
 
 	// -- Handlers ------------------------------------------------------─
 	healthHandler := handler.NewHealthHandler(pool)
-	appHandler    := handler.NewAppHandler(appRepo, deployRepo, tc, log)
+	appHandler    := handler.NewAppHandler(appRepo, deployRepo, tc, dockerClient, redisClient, log)
 	wsHandler     := handler.NewWSHandler(deployRepo, redisClient, log)
 
 	// -- Servidor HTTP --------------------------------------------------
