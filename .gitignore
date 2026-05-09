@@ -6,8 +6,8 @@ build/
 
 # Go
 bin/
-/hangar/api/api
-/hangar/api/worker
+/api/api
+/api/worker
 
 # Environment variables
 .env
