@@ -1,20 +1,29 @@
-type Status = string
-
-const config: Record<string, { label: string; color: string }> = {
-  idle:     { label: 'idle',     color: 'text-[var(--muted)] border-[var(--border)]' },
-  building: { label: 'building', color: 'text-[var(--yellow)] border-yellow-800 animate-pulse' },
-  running:  { label: 'running',  color: 'text-[var(--green)] border-green-900' },
-  failed:   { label: 'failed',   color: 'text-[var(--red)] border-red-900' },
-  stopped:  { label: 'stopped',  color: 'text-[var(--muted)] border-[var(--border)]' },
-  pending:  { label: 'pending',  color: 'text-[var(--yellow)] border-yellow-800 animate-pulse' },
-  success:  { label: 'success',  color: 'text-[var(--green)] border-green-900' },
-  canceled: { label: 'canceled', color: 'text-[var(--muted)] border-[var(--border)]' },
+// Estado con texto y forma, nunca solo color: punto lleno = en marcha, anillo = detenido, rombo = error.
+const config: Record<string, { label: string; color: string; shape: 'dot' | 'ring' | 'diamond' | 'pulse' }> = {
+  idle:     { label: 'Sin desplegar', color: 'var(--muted)',  shape: 'ring' },
+  building: { label: 'Construyendo',  color: 'var(--yellow)', shape: 'pulse' },
+  running:  { label: 'En línea',      color: 'var(--green)',  shape: 'dot' },
+  failed:   { label: 'Falló',         color: 'var(--red)',    shape: 'diamond' },
+  stopped:  { label: 'Detenida',      color: 'var(--muted)',  shape: 'ring' },
+  pending:  { label: 'En cola',       color: 'var(--yellow)', shape: 'pulse' },
+  success:  { label: 'Desplegado',    color: 'var(--green)',  shape: 'dot' },
+  canceled: { label: 'Cancelado',     color: 'var(--muted)',  shape: 'ring' },
 }
 
-export default function StatusBadge({ status }: { status: Status }) {
-  const s = config[status] ?? { label: status, color: 'text-[var(--muted)] border-[var(--border)]' }
+export default function StatusBadge({ status }: { status: string }) {
+  const s = config[status] ?? { label: status, color: 'var(--muted)', shape: 'ring' as const }
+  const marca =
+    s.shape === 'diamond' ? 'h-2 w-2 rotate-45' :
+    s.shape === 'ring' ? 'h-2 w-2 rounded-full border-2' :
+    s.shape === 'pulse' ? 'h-2 w-2 rounded-full animate-pulse' :
+    'h-2 w-2 rounded-full'
   return (
-    <span className={`text-xs px-2 py-0.5 border rounded font-mono ${s.color}`}>
+    <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-xs font-medium text-[var(--text)]">
+      <span
+        aria-hidden="true"
+        className={marca}
+        style={s.shape === 'ring' ? { borderColor: s.color } : { background: s.color }}
+      />
       {s.label}
     </span>
   )

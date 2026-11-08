@@ -3,59 +3,37 @@ import LogStream from '@/app/components/LogStream'
 
 export const dynamic = 'force-dynamic'
 
-export default async function DeploymentPage({
-  params,
-}: {
-  params: { id: string; deploymentId: string }
-}) {
-  const [app, deployments] = await Promise.all([
-    getApp(params.id),
-    getDeployments(params.id),
-  ])
-
-  const deployment = deployments.find(d => d.id === params.deploymentId)
+export default async function DeploymentPage({ params }: { params: { id: string; deploymentId: string } }) {
+  const [app, deployments] = await Promise.all([getApp(params.id), getDeployments(params.id)])
+  const deployment = deployments.find((d) => d.id === params.deploymentId)
 
   if (!deployment) {
     return (
-      <div className="text-center py-20 text-[var(--muted)]">
-        deployment no encontrado
+      <div className="py-20 text-center">
+        <p className="rotulo text-3xl">Despliegue no encontrado</p>
+        <a href={`/apps/${params.id}`} className="mt-3 inline-block text-sm text-[var(--accent)] hover:underline">Volver a la aplicación</a>
       </div>
     )
   }
 
   return (
     <div className="space-y-8">
+      <nav aria-label="Ruta" className="flex items-center gap-2 text-sm text-[var(--muted)]">
+        <a href="/" className="hover:text-[var(--text)]">Aplicaciones</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/apps/${app.id}`} className="hover:text-[var(--text)]">{app.name}</a>
+        <span aria-hidden="true">/</span>
+        <span className="mono text-[var(--text)]" aria-current="page">{deployment.id.slice(0, 8)}</span>
+      </nav>
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
-        <a href="/" className="hover:text-white transition-colors">apps</a>
-        <span>/</span>
-        <a href={`/apps/${app.id}`} className="hover:text-white transition-colors">{app.name}</a>
-        <span>/</span>
-        <span className="text-white">{deployment.id.slice(0, 8)}</span>
-      </div>
-
-      {/* Título */}
       <div>
-        <h1 className="text-white text-lg font-medium">deployment logs</h1>
-        <p className="text-[var(--muted)] text-xs mt-0.5">
-          {app.name} - {new Date(deployment.created_at).toLocaleString()}
+        <h1 className="rotulo text-5xl leading-none">Despliegue de {app.name}</h1>
+        <p className="mt-3 text-[var(--muted)]">
+          {new Date(deployment.created_at).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })} · Temporal coordina cada etapa y reintenta si algo falla.
         </p>
       </div>
 
-      {/* Stream de logs en tiempo real */}
-      <LogStream
-        deploymentId={deployment.id}
-        initialStatus={deployment.status}
-      />
-
-      {/* Link de vuelta */}
-      <a
-        href={`/apps/${app.id}`}
-        className="inline-block text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
-      >
-        <- volver a {app.name}
-      </a>
+      <LogStream deploymentId={deployment.id} initialStatus={deployment.status} />
     </div>
   )
 }

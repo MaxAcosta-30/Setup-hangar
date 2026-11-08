@@ -1,7 +1,9 @@
 // Cliente de API - todas las llamadas van a /api/v1/* que Next.js
 // proxea a http://localhost:3000/api/v1/* (ver next.config.js)
 
-const BASE = typeof window === 'undefined' ? 'http://localhost:3000/api/v1' : '/api/v1'
+// HANGAR_API_URL permite correr la API en otro puerto; por defecto, el de siempre.
+const API_URL = process.env.HANGAR_API_URL ?? 'http://localhost:3000'
+const BASE = typeof window === 'undefined' ? `${API_URL}/api/v1` : '/api/v1'
 
 export interface App {
   id: string
