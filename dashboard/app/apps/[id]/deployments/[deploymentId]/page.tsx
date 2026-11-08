@@ -27,7 +27,7 @@ export default async function DeploymentPage({ params }: { params: { id: string;
       </nav>
 
       <div>
-        <h1 className="rotulo text-5xl leading-none">Despliegue de {app.name}</h1>
+        <h1 className="rotulo text-4xl leading-none sm:text-5xl">Despliegue de {app.name}</h1>
         <p className="mt-3 text-[var(--muted)]">
           {new Date(deployment.created_at).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })} · Temporal coordina cada etapa y reintenta si algo falla.
         </p>

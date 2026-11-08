@@ -24,7 +24,7 @@ export default async function AppPage({ params }: { params: { id: string } }) {
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
           <div className="flex flex-wrap items-center gap-4">
-            <h1 className="rotulo text-5xl leading-none">{app.name}</h1>
+            <h1 className="rotulo text-4xl leading-none sm:text-5xl">{app.name}</h1>
             <StatusBadge status={ultimo?.status ?? app.status} />
           </div>
           <p className="mono mt-3 text-sm text-[var(--muted)]">{app.subdomain}.hangar.local</p>
@@ -64,8 +64,8 @@ export default async function AppPage({ params }: { params: { id: string } }) {
                 <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
                   <th className="px-5 py-3 font-medium">Despliegue</th>
                   <th className="px-5 py-3 font-medium">Estado</th>
-                  <th className="px-5 py-3 font-medium">Commit</th>
-                  <th className="px-5 py-3 font-medium">Fecha</th>
+                  <th className="hidden px-5 py-3 font-medium sm:table-cell">Commit</th>
+                  <th className="hidden px-5 py-3 font-medium sm:table-cell">Fecha</th>
                   <th className="px-5 py-3"><span className="sr-only">Logs</span></th>
                 </tr>
               </thead>
@@ -74,8 +74,8 @@ export default async function AppPage({ params }: { params: { id: string } }) {
                   <tr key={d.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)]">
                     <td className="mono px-5 py-3.5 text-xs">{d.id.slice(0, 8)}</td>
                     <td className="px-5 py-3.5"><StatusBadge status={d.status} /></td>
-                    <td className="mono px-5 py-3.5 text-xs text-[var(--muted)]">{d.commit_sha ? d.commit_sha.slice(0, 7) : '—'}</td>
-                    <td className="px-5 py-3.5 text-xs text-[var(--muted)]">{fecha(d.created_at)}</td>
+                    <td className="mono hidden px-5 py-3.5 text-xs text-[var(--muted)] sm:table-cell">{d.commit_sha ? d.commit_sha.slice(0, 7) : '—'}</td>
+                    <td className="hidden px-5 py-3.5 text-xs text-[var(--muted)] sm:table-cell">{fecha(d.created_at)}</td>
                     <td className="px-5 py-3.5 text-right">
                       <a href={`/apps/${app.id}/deployments/${d.id}`} className="text-xs font-medium text-[var(--muted)] hover:text-[var(--accent)]">
                         Ver logs<span className="sr-only"> del despliegue {d.id.slice(0, 8)}</span>

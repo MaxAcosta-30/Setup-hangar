@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <a href="/" aria-label="Hangar, inicio" className="rounded">
               <Logo />
             </a>
-            <span className="text-sm text-[var(--muted)]">PaaS autoalojado · Go · Temporal · Docker</span>
+            <span className="hidden text-sm text-[var(--muted)] sm:inline">PaaS autoalojado · Go · Temporal · Docker</span>
           </nav>
         </header>
         <main className="mx-auto max-w-6xl px-6 py-10">{children}</main>

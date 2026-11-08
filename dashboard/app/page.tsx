@@ -20,7 +20,7 @@ export default async function HomePage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div>
-          <h1 className="rotulo text-5xl leading-none">Aplicaciones</h1>
+          <h1 className="rotulo text-4xl leading-none sm:text-5xl">Aplicaciones</h1>
           <p className="mt-3 text-[var(--muted)]">
             {apps.length} {apps.length === 1 ? 'registrada' : 'registradas'} · <span className="text-[var(--text)]">{enLinea} en línea</span>
           </p>
@@ -39,9 +39,9 @@ export default async function HomePage() {
             <thead>
               <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
                 <th className="px-5 py-3 font-medium">Aplicación</th>
-                <th className="px-5 py-3 font-medium">Subdominio</th>
+                <th className="hidden px-5 py-3 font-medium sm:table-cell">Subdominio</th>
                 <th className="px-5 py-3 font-medium">Último despliegue</th>
-                <th className="px-5 py-3 font-medium">Creada</th>
+                <th className="hidden px-5 py-3 font-medium sm:table-cell">Creada</th>
                 <th className="px-5 py-3"><span className="sr-only">Acciones</span></th>
               </tr>
             </thead>
@@ -53,13 +53,13 @@ export default async function HomePage() {
                       {app.name}
                     </a>
                   </td>
-                  <td className="mono px-5 py-4 text-xs text-[var(--muted)]">{app.subdomain}.hangar.local</td>
+                  <td className="mono hidden px-5 py-4 text-xs text-[var(--muted)] sm:table-cell">{app.subdomain}.hangar.local</td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-4">
                       <StatusBadge status={ultimos[i]?.status ?? app.status} />
                       {/* Mini riel: las cuatro etapas del último despliegue */}
                       {etapas[i] && (
-                        <span className="flex gap-1" aria-label={`Etapas: ${ETAPAS.map((e, k) => `${e.nombre} ${etapas[i]![k]}`).join(', ')}`}>
+                        <span className="hidden gap-1 md:flex" aria-label={`Etapas: ${ETAPAS.map((e, k) => `${e.nombre} ${etapas[i]![k]}`).join(', ')}`}>
                           {etapas[i]!.map((estado, k) => (
                             <span
                               key={k}
@@ -71,7 +71,7 @@ export default async function HomePage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-5 py-4 text-xs text-[var(--muted)]">{fecha(app.created_at)}</td>
+                  <td className="hidden px-5 py-4 text-xs text-[var(--muted)] sm:table-cell">{fecha(app.created_at)}</td>
                   <td className="px-5 py-4 text-right">
                     <a href={`/apps/${app.id}`} className="text-xs font-medium text-[var(--muted)] hover:text-[var(--accent)]">
                       Ver detalle<span className="sr-only"> de {app.name}</span>

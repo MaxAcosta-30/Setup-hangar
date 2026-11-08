@@ -82,11 +82,11 @@ export default function LogStream({ deploymentId, initialStatus }: Props) {
             const { origen, texto, listo } = partes(line.message)
             const error = /error|falló|fail/i.test(texto)
             return (
-              <div key={i} className="grid grid-cols-[3.25rem_4.5rem_4.25rem_1fr] items-baseline gap-2 px-4 hover:bg-white/[0.03]">
-                <span className="select-none text-right text-[var(--border)]">{i + 1}</span>
+              <div key={i} className="grid grid-cols-[4.25rem_1fr] items-baseline gap-2 px-4 hover:bg-white/[0.03] sm:grid-cols-[3.25rem_4.5rem_4.25rem_1fr]">
+                <span className="hidden select-none text-right text-[#4a4f56] sm:inline">{i + 1}</span>
                 <span className="select-none text-[var(--muted)]">{new Date(line.time).toLocaleTimeString('es-MX', { hour12: false })}</span>
-                <span className={origen === 'build' ? 'text-[var(--muted)]' : 'text-[var(--accent)]'}>{origen}</span>
-                <span className={error ? 'text-[var(--red)]' : origen === 'build' ? 'text-[var(--muted)]' : 'text-[var(--text)]'}>
+                <span className={`hidden sm:inline ${origen === 'build' ? 'text-[var(--muted)]' : 'text-[var(--accent)]'}`}>{origen}</span>
+                <span className={`min-w-0 break-words [overflow-wrap:anywhere] ${error ? 'text-[var(--red)]' : origen === 'build' ? 'text-[var(--muted)]' : 'text-[var(--text)]'}`}>
                   {texto}
                   {listo && <span className="ml-2 rounded bg-[var(--accent)] px-1.5 py-px text-[10px] font-bold text-[var(--on-accent)]">LISTO</span>}
                 </span>
