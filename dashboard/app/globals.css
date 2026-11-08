@@ -1,23 +1,130 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Hangar · "Torre": grafito de hangar y naranja de seguridad aeronáutica como único acento.
+   Contraste medido sobre --bg: texto 16:1, muted 7.4:1, acento 6.6:1. */
 :root {
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --border: #222222;
-  --text: #e5e5e5;
-  --muted: #666666;
-  --accent: #3b82f6;
-  --green: #22c55e;
-  --red: #ef4444;
-  --yellow: #eab308;
+  --bg: #0e0f11;
+  --surface: #16181b;
+  --surface-2: #1d2024;
+  --border: #2a2e33;
+  --text: #ecedee;
+  --muted: #9ba1a8;
+  --accent: #ff6a13;
+  --on-accent: #160a02;
+  --green: #4ade80;
+  --red: #ff6b6b;
+  --yellow: #f5c542;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 body {
-  background-color: var(--bg);
+  background:
+    radial-gradient(80% 50% at 50% -10%, rgb(255 106 19 / 0.07), transparent 70%),
+    var(--bg);
   color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Rótulos: Big Shoulders, condensada e industrial, como la señalética de un hangar */
+.rotulo {
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Riel del pipeline: clonar → construir → ejecutar → enrutar */
+.riel {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.riel-paso {
+  position: relative;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  transition:
+    border-color 240ms var(--ease),
+    background-color 240ms var(--ease);
+}
+
+.riel-paso::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: 6px 6px 0 0;
+  background: var(--border);
+  transform-origin: left;
+  transition: background-color 240ms var(--ease);
+}
+
+.riel-paso[data-estado='listo']::before {
+  background: var(--accent);
+  animation: riel-llena 520ms var(--ease);
+}
+
+.riel-paso[data-estado='activo']::before {
+  background: linear-gradient(90deg, var(--accent), transparent);
+  animation: riel-activo 1.4s linear infinite;
+}
+
+.riel-paso[data-estado='fallo'] {
+  border-color: rgb(255 107 107 / 0.5);
+}
+
+.riel-paso[data-estado='fallo']::before {
+  background: var(--red);
+}
+
+@keyframes riel-llena {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes riel-activo {
+  from {
+    background-position: -120px 0;
+  }
+  to {
+    background-position: 240px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Celular: el riel del pipeline pasa a 2×2 y los rótulos grandes se ajustan */
+@media (max-width: 640px) {
+  .riel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

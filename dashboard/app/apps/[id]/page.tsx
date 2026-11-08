@@ -1,101 +1,84 @@
-import { getApp, getDeployments } from '@/app/lib/api'
+import { getApp, getDeployments, getLogs } from '@/app/lib/api'
 import StatusBadge from '@/app/components/StatusBadge'
 import DeployButton from '@/app/components/DeployButton'
+import Riel from '@/app/components/Riel'
+import { estadoEtapas } from '@/app/lib/pipeline'
 
 export const dynamic = 'force-dynamic'
 
+const fecha = (iso: string) => new Date(iso).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+
 export default async function AppPage({ params }: { params: { id: string } }) {
-  const [app, deployments] = await Promise.all([
-    getApp(params.id),
-    getDeployments(params.id),
-  ])
+  const [app, deployments] = await Promise.all([getApp(params.id), getDeployments(params.id)])
+  const ultimo = deployments[0]
+  const logs = ultimo ? await getLogs(ultimo.id) : []
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
+      <nav aria-label="Ruta" className="flex items-center gap-2 text-sm text-[var(--muted)]">
+        <a href="/" className="hover:text-[var(--text)]">Aplicaciones</a>
+        <span aria-hidden="true">/</span>
+        <span className="text-[var(--text)]" aria-current="page">{app.name}</span>
+      </nav>
 
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
-        <a href="/" className="hover:text-white transition-colors">apps</a>
-        <span>/</span>
-        <span className="text-white">{app.name}</span>
-      </div>
-
-      {/* App header */}
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-white text-lg font-medium">{app.name}</h1>
-            <StatusBadge status={app.status} />
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <div className="flex flex-wrap items-center gap-4">
+            <h1 className="rotulo text-4xl leading-none sm:text-5xl">{app.name}</h1>
+            <StatusBadge status={ultimo?.status ?? app.status} />
           </div>
-          <a
-            href={`http://${app.subdomain}.hangar.local`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
-          >
-            {app.subdomain}.hangar.local ->
-          </a>
+          <p className="mono mt-3 text-sm text-[var(--muted)]">{app.subdomain}.hangar.local</p>
         </div>
         <DeployButton appId={app.id} />
       </div>
 
-      {/* Info */}
-      <div className="grid grid-cols-2 gap-4">
+      {ultimo && (
+        <section className="space-y-3">
+          <h2 className="text-sm font-semibold text-[var(--muted)]">Último despliegue · {fecha(ultimo.created_at)}</h2>
+          <Riel estados={estadoEtapas(logs.map((l) => l.message), ultimo.status)} />
+        </section>
+      )}
+
+      <dl className="grid gap-px overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2">
         {[
-          { label: 'git url', value: app.git_url },
-          { label: 'app id', value: app.id },
+          { label: 'Repositorio', value: app.git_url },
+          { label: 'ID de la app', value: app.id },
         ].map(({ label, value }) => (
-          <div key={label} className="border border-[var(--border)] rounded-lg p-4">
-            <p className="text-xs text-[var(--muted)] mb-1">{label}</p>
-            <p className="text-xs text-white font-mono truncate">{value}</p>
+          <div key={label} className="bg-[var(--surface)] p-4">
+            <dt className="text-xs text-[var(--muted)]">{label}</dt>
+            <dd className="mono mt-1 truncate text-sm">{value}</dd>
           </div>
         ))}
-      </div>
+      </dl>
 
-      {/* Historial de deployments */}
-      <div className="space-y-3">
-        <h2 className="text-white text-sm font-medium">deployments</h2>
-
+      <section className="space-y-3">
+        <h2 className="rotulo text-2xl">Despliegues</h2>
         {deployments.length === 0 ? (
-          <div className="border border-dashed border-[var(--border)] rounded-lg p-8 text-center">
-            <p className="text-[var(--muted)] text-xs">sin deployments todavía - usa el botón deploy</p>
+          <div className="rounded-lg border border-dashed border-[var(--border)] p-10 text-center text-sm text-[var(--muted)]">
+            Todavía no hay despliegues. Usa «Desplegar» para lanzar el primero.
           </div>
         ) : (
-          <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+          <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-                  <th className="text-left px-4 py-3 text-xs text-[var(--muted)] font-normal">id</th>
-                  <th className="text-left px-4 py-3 text-xs text-[var(--muted)] font-normal">status</th>
-                  <th className="text-left px-4 py-3 text-xs text-[var(--muted)] font-normal">commit</th>
-                  <th className="text-left px-4 py-3 text-xs text-[var(--muted)] font-normal">date</th>
-                  <th className="px-4 py-3" />
+                <tr className="border-b border-[var(--border)] text-left text-xs text-[var(--muted)]">
+                  <th className="px-5 py-3 font-medium">Despliegue</th>
+                  <th className="px-5 py-3 font-medium">Estado</th>
+                  <th className="hidden px-5 py-3 font-medium sm:table-cell">Commit</th>
+                  <th className="hidden px-5 py-3 font-medium sm:table-cell">Fecha</th>
+                  <th className="px-5 py-3"><span className="sr-only">Logs</span></th>
                 </tr>
               </thead>
               <tbody>
                 {deployments.map((d) => (
-                  <tr
-                    key={d.id}
-                    className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface)] transition-colors"
-                  >
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--muted)]">
-                      {d.id.slice(0, 8)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={d.status} />
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-[var(--muted)]">
-                      {d.commit_sha ? d.commit_sha.slice(0, 7) : '-'}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-[var(--muted)]">
-                      {new Date(d.created_at).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <a
-                        href={`/apps/${app.id}/deployments/${d.id}`}
-                        className="text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
-                      >
-                        logs ->
+                  <tr key={d.id} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--surface-2)]">
+                    <td className="mono px-5 py-3.5 text-xs">{d.id.slice(0, 8)}</td>
+                    <td className="px-5 py-3.5"><StatusBadge status={d.status} /></td>
+                    <td className="mono hidden px-5 py-3.5 text-xs text-[var(--muted)] sm:table-cell">{d.commit_sha ? d.commit_sha.slice(0, 7) : '—'}</td>
+                    <td className="hidden px-5 py-3.5 text-xs text-[var(--muted)] sm:table-cell">{fecha(d.created_at)}</td>
+                    <td className="px-5 py-3.5 text-right">
+                      <a href={`/apps/${app.id}/deployments/${d.id}`} className="text-xs font-medium text-[var(--muted)] hover:text-[var(--accent)]">
+                        Ver logs<span className="sr-only"> del despliegue {d.id.slice(0, 8)}</span>
                       </a>
                     </td>
                   </tr>
@@ -104,7 +87,7 @@ export default async function AppPage({ params }: { params: { id: string } }) {
             </table>
           </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }

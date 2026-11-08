@@ -6,33 +6,32 @@ import { triggerDeploy } from '@/app/lib/api'
 
 export default function DeployButton({ appId }: { appId: string }) {
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   async function handleDeploy() {
     setLoading(true)
+    setError('')
     try {
       const data = await triggerDeploy(appId)
-      // Redirige a la vista de logs del nuevo deployment
+      // Lleva a la vista de logs del despliegue nuevo
       router.push(`/apps/${appId}/deployments/${data.deployment.id}`)
-    } catch (e) {
-      console.error('deploy error', e)
+    } catch {
+      setError('No se pudo iniciar el despliegue. ¿Está corriendo la API?')
       setLoading(false)
     }
   }
 
   return (
-    <button
-      onClick={handleDeploy}
-      disabled={loading}
-      className="
-        px-4 py-2 text-sm font-mono
-        bg-[var(--accent)] text-white rounded
-        hover:bg-blue-400 active:bg-blue-700
-        disabled:opacity-50 disabled:cursor-not-allowed
-        transition-colors
-      "
-    >
-      {loading ? 'deploying...' : 'deploy'}
-    </button>
+    <div className="flex flex-col items-end gap-2">
+      <button
+        onClick={handleDeploy}
+        disabled={loading}
+        className="rotulo rounded-md bg-[var(--accent)] px-6 py-3 text-lg leading-none text-[var(--on-accent)] transition-[transform,filter] duration-150 hover:brightness-110 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {loading ? 'Despegando…' : 'Desplegar'}
+      </button>
+      {error && <p role="alert" className="text-xs text-[var(--red)]">{error}</p>}
+    </div>
   )
 }
